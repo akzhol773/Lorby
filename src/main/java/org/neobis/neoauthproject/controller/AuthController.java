@@ -5,6 +5,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.neobis.neoauthproject.dto.UserAuthorizationRequestDto;
+import org.neobis.neoauthproject.dto.UserAuthorizationResponseDto;
+import org.neobis.neoauthproject.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +32,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<UserResponseDto> register(@Valid @RequestBody UserRequestDto registrationUserDto){
+    public ResponseEntity<UserAuthorizationResponseDto> register(@Valid @RequestBody UserAuthorizationRequestDto registrationUserDto){
         return  userService.createNewUser(registrationUserDto);}
 
 
