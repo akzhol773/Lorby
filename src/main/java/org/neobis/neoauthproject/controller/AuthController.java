@@ -7,7 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.neobis.neoauthproject.dto.UserAuthorizationRequestDto;
 import org.neobis.neoauthproject.dto.UserAuthorizationResponseDto;
-import org.neobis.neoauthproject.service.UserService;
+import org.neobis.neoauthproject.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/auth/")
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
 
     @Operation(
             summary = "Registration",
@@ -33,7 +33,19 @@ public class AuthController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<UserAuthorizationResponseDto> register(@Valid @RequestBody UserAuthorizationRequestDto registrationUserDto){
-        return  userService.createNewUser(registrationUserDto);}
+        return  authService.createNewUser(registrationUserDto);}
+
+    @Operation(
+            summary = "Check username",
+            description = "This endpoint is designed to check if the username exists in the database or not",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Returns true or false")
+            }
+    )
+    @PostMapping("/check-username")
+    public ResponseEntity<Boolean> checkUsername(@RequestBody String username) {
+        return ResponseEntity.ok(authService.isPresentUsername(username));
+    }
 
 
 }
