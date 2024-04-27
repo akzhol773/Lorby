@@ -1,1 +1,19 @@
-spring.application.name=neoAuthProject
+spring:
+  datasource:
+    url: ${JDBC_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: true
+    properties:
+      hibernate:
+        ddl-auto: update
+    defer-datasource-initialization: true
+    show-sql: true
+sql:
+  init:
+    mode: always
