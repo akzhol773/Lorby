@@ -1,0 +1,23 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: true
+    properties:
+      hibernate:
+        ddl-auto: update
+    defer-datasource-initialization: true
+    show-sql: true
+  logging:
+    level:
+      org:
+        springframework:
+          security: debug
+      sql: debug
+  main:
+    banner-mode: off
+
+sql:
+  init:
+    mode: always
