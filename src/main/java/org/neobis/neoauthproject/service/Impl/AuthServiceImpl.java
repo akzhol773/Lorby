@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.neobis.neoauthproject.dto.UserAuthorizationRequestDto;
 import org.neobis.neoauthproject.dto.UserAuthorizationResponseDto;
+import org.neobis.neoauthproject.dto.UsernameDto;
 import org.neobis.neoauthproject.entity.ConfirmationToken;
 import org.neobis.neoauthproject.entity.Role;
 import org.neobis.neoauthproject.entity.User;
@@ -67,8 +68,13 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public boolean isPresentUsername(String username) {
-        return userRepository.findByUsername(username).isPresent();
+    public boolean isPresentUsername(UsernameDto dto) {
+
+        if (userRepository.findByUsername(dto.username()).isPresent()) {
+            return true;
+        }else {
+            return false;
+        }
     }
 
 

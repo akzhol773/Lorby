@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.neobis.neoauthproject.dto.UserAuthorizationRequestDto;
 import org.neobis.neoauthproject.dto.UserAuthorizationResponseDto;
+import org.neobis.neoauthproject.dto.UsernameDto;
 import org.neobis.neoauthproject.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,8 +45,8 @@ public class AuthController {
             }
     )
     @PostMapping("/check-username")
-    public ResponseEntity<Boolean> checkUsername(@RequestBody String username) {
-        return ResponseEntity.ok(authService.isPresentUsername(username));
+    public Boolean checkUsername(@RequestBody UsernameDto dto) {
+        return authService.isPresentUsername(dto);
     }
 
     @Operation(
