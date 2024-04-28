@@ -31,12 +31,15 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailService emailService;
-    private static final String CONFIRM_EMAIL_LINK = "http://64.225.109.189:8080/api/auth/confirm-email?token=";
+    private static final String CONFIRM_EMAIL_LINK = System.getenv("CONFIRM_EMAIL_LINK");
     @Override
     @Transactional
     public ResponseEntity<UserAuthorizationResponseDto> createNewUser(UserAuthorizationRequestDto registrationUserDto) {
         if (userRepository.findByEmailIgnoreCase(registrationUserDto.email()).isPresent()) {
             throw new EmailAlreadyExistException("Email already exist. Please, try to use another one.");
+        }
+        if (userRepository.findByUsernameIgnoreCase(registrationUserDto.username()).isPresent()) {
+            throw new UsernameAlreadyTakenException("Username is already taken. Please, try to use another one.");
         }
         User user = new User();
         user.setEnabled(false);
@@ -100,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
         if (confirmationToken != null){
             confirmationToken.setConfirmedAt(LocalDateTime.now());
             confirmationToken.getUser().setEnabled(true);
-            return "redirect:/login";
+            return "Email confirmed successfully. Go to the login page.";
         }else {
             return "verification_failed";
         }
