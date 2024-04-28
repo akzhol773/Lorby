@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.findByEmailIgnoreCase(registrationUserDto.email()).isPresent()) {
             throw new EmailAlreadyExistException("Email already exist. Please, try to use another one.");
         }
-        if (userRepository.findByUsernameIgnoreCase(registrationUserDto.username()).isPresent()) {
+        if (userRepository.findByUsername(registrationUserDto.username()).isPresent()) {
             throw new UsernameAlreadyTakenException("Username is already taken. Please, try to use another one.");
         }
         User user = new User();
@@ -68,7 +68,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean isPresentUsername(String username) {
-        return userRepository.findByUsernameIgnoreCase(username).isPresent();
+        return userRepository.findByUsername(username).isPresent();
     }
 
 
