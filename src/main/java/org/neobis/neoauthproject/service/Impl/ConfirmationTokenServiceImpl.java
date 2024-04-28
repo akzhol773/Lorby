@@ -6,6 +6,8 @@ import org.neobis.neoauthproject.repository.ConfirmationTokenRepository;
 import org.neobis.neoauthproject.service.ConfirmationTokenService;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
@@ -13,5 +15,10 @@ public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
     @Override
     public void saveConfirmationToken(ConfirmationToken confirmationToken) {
         confirmationTokenRepository.save(confirmationToken);
+    }
+
+    @Override
+    public Optional<ConfirmationToken> getToken(String token) {
+        return confirmationTokenRepository.findByToken(token);
     }
 }

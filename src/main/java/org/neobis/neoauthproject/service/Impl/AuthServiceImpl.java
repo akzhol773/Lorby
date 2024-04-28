@@ -1,18 +1,19 @@
 package org.neobis.neoauthproject.service.Impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.neobis.neoauthproject.dto.UserAuthorizationRequestDto;
 import org.neobis.neoauthproject.dto.UserAuthorizationResponseDto;
 import org.neobis.neoauthproject.entity.ConfirmationToken;
 import org.neobis.neoauthproject.entity.Role;
 import org.neobis.neoauthproject.entity.User;
-import org.neobis.neoauthproject.exception.EmailAlreadyExistException;
-import org.neobis.neoauthproject.exception.PasswordNotMatchException;
-import org.neobis.neoauthproject.exception.UserRoleNotFoundException;
+import org.neobis.neoauthproject.exception.*;
 import org.neobis.neoauthproject.repository.RoleRepository;
 import org.neobis.neoauthproject.repository.UserRepository;
 import org.neobis.neoauthproject.service.AuthService;
 import org.neobis.neoauthproject.service.ConfirmationTokenService;
+import org.neobis.neoauthproject.service.EmailService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,8 +30,10 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
+    private final EmailService emailService;
     private static final String CONFIRM_EMAIL_LINK = System.getenv("CONFIRM_EMAIL_LINK");
     @Override
+    @Transactional
     public ResponseEntity<UserAuthorizationResponseDto> createNewUser(UserAuthorizationRequestDto registrationUserDto) {
         if (userRepository.findByEmailIgnoreCase(registrationUserDto.email()).isPresent()) {
             throw new EmailAlreadyExistException("Email already exist. Please, try to use another one.");
@@ -53,8 +56,9 @@ public class AuthServiceImpl implements AuthService {
         confirmationTokenService.saveConfirmationToken(confirmationToken);
 
         String link = CONFIRM_EMAIL_LINK + confirmationToken.getToken();
+        emailService.prepareMail(link, user);
 
-
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UserAuthorizationResponseDto(user.getUsername(),"User registered successfully"));
 
     }
 
@@ -79,6 +83,27 @@ public class AuthServiceImpl implements AuthService {
                 confirmationToken.setConfirmedAt(null);
                 confirmationToken.setUser(user);
         return confirmationToken;
+    }
+
+    @Override
+    public String confirmEmail(String token) {
+        ConfirmationToken confirmationToken = confirmationTokenService.getToken(token).orElseThrow(()->new TokenNotFoundException("Token not found"));
+        if (confirmationToken.getConfirmedAt() != null) {
+            throw new EmailAlreadyConfirmedException("Email already confirmed");
+        }
+        LocalDateTime expiredAt = confirmationToken.getExpiresAt();
+        if(expiredAt.isBefore(LocalDateTime.now())){
+            throw new TokenExpiredException("Token has expired");
+
+        }
+
+        if (confirmationToken != null){
+            confirmationToken.setConfirmedAt(LocalDateTime.now());
+            confirmationToken.getUser().setEnabled(true);
+            return "redirect:/login";
+        }else {
+            return "verification_failed";
+        }
     }
 
 }

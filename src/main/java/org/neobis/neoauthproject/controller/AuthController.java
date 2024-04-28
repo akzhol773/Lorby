@@ -1,5 +1,6 @@
 package org.neobis.neoauthproject.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -45,6 +46,23 @@ public class AuthController {
     @PostMapping("/check-username")
     public ResponseEntity<Boolean> checkUsername(@RequestBody String username) {
         return ResponseEntity.ok(authService.isPresentUsername(username));
+    }
+
+    @Operation(
+            summary = "Confirm the email",
+            description = "Whenever a user is registered he or she gets email containing link to activate his or her account"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Email successfully confirmed"),
+            @ApiResponse(responseCode = "403", description = "Token has expired"),
+            @ApiResponse(responseCode = "403", description = "Token not found")
+
+
+    })
+    @Hidden
+    @GetMapping("/confirm-email")
+    public String confirm(@RequestParam("token") String token){
+        return authService.confirmEmail(token);
     }
 
 

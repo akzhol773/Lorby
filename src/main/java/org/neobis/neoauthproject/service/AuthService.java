@@ -13,4 +13,6 @@ public interface AuthService {
     boolean isPresentUsername(String username);
 
     ConfirmationToken generateConfirmToken(User user);
+
+    String confirmEmail(String token);
 }

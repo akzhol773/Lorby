@@ -5,5 +5,5 @@ import lombok.Builder;
 
 
 @Builder
-public record UserAuthorizationResponseDto(String status, String message) {
+public record UserAuthorizationResponseDto(String username, String message) {
 }
