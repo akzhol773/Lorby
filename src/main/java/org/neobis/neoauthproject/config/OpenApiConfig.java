@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
         servers = {
                 @Server(
                         description = "Local environment",
-                        url = "https://"
+                        url = "https://https://reliable-courage-neoauth.up.railway.app/"
                 )
         }
 )

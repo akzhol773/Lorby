@@ -68,11 +68,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean isPresentUsername(String username) {
-        boolean isPresent = false;
-        if(userRepository.findByUsernameIgnoreCase(username).isPresent()){
-            isPresent =  true;
-        }
-        return isPresent;
+        return userRepository.findByUsernameIgnoreCase(username).isPresent();
     }
 
 
