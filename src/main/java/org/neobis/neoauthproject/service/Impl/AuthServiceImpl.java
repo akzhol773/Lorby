@@ -31,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailService emailService;
-    private static final String CONFIRM_EMAIL_LINK = System.getenv("CONFIRM_EMAIL_LINK");
+    private static final String CONFIRM_EMAIL_LINK = "http://64.225.109.189:8080/api/auth/confirm-email?token=";
     @Override
     @Transactional
     public ResponseEntity<UserAuthorizationResponseDto> createNewUser(UserAuthorizationRequestDto registrationUserDto) {
