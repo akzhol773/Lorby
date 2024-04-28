@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Setter
 @Data
 @NoArgsConstructor
-@RequiredArgsConstructor
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ConfirmationToken {
