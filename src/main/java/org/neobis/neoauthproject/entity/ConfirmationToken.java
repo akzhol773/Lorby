@@ -26,10 +26,9 @@ public class ConfirmationToken {
     @Column(nullable = false)
     LocalDateTime expiresAt;
 
-    @Column(nullable = false)
     LocalDateTime confirmedAt;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(nullable = false, name = "user_id")
     User user;
 
