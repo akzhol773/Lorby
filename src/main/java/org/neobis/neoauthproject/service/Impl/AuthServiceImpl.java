@@ -2,9 +2,8 @@ package org.neobis.neoauthproject.service.Impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.neobis.neoauthproject.dto.UserAuthorizationRequestDto;
-import org.neobis.neoauthproject.dto.UserAuthorizationResponseDto;
-import org.neobis.neoauthproject.dto.UsernameDto;
+import org.neobis.neoauthproject.component.JwtTokenUtils;
+import org.neobis.neoauthproject.dto.*;
 import org.neobis.neoauthproject.entity.ConfirmationToken;
 import org.neobis.neoauthproject.entity.Role;
 import org.neobis.neoauthproject.entity.User;
@@ -16,6 +15,12 @@ import org.neobis.neoauthproject.service.ConfirmationTokenService;
 import org.neobis.neoauthproject.service.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,11 +32,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+    private final JwtTokenUtils jwtTokenUtils;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailService emailService;
+    private final AuthenticationManager authenticationManager;
     private static final String CONFIRM_EMAIL_LINK = System.getenv("CONFIRM_EMAIL_LINK");
     @Override
     @Transactional
@@ -108,6 +115,25 @@ public class AuthServiceImpl implements AuthService {
             return "Email confirmed successfully. Go to the login page.";
         }else {
             return "verification_failed";
+        }
+    }
+
+    @Override
+    public ResponseEntity<JwtResponseDto> authenticate(JwtRequestDto authRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
+            User user = (User) authentication.getPrincipal();
+            return ResponseEntity.ok(new JwtResponseDto(authRequest.username(),
+                    jwtTokenUtils.generateAccessToken(user),
+                    jwtTokenUtils.generateRefreshToken(user)));
+
+
+        } catch (AuthenticationException exception) {
+            if (exception instanceof BadCredentialsException) {
+                throw new BadCredentialsException("Invalid username or password");
+            } else {
+                throw new DisabledException("User is not enabled yet");
+            }
         }
     }
 

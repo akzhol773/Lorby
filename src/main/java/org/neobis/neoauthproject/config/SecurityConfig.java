@@ -1,7 +1,12 @@
 package org.neobis.neoauthproject.config;
 
+import org.neobis.neoauthproject.component.CustomUserDetails;
+import org.neobis.neoauthproject.component.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,12 +19,16 @@ import org.springframework.web.cors.CorsConfiguration;
 
 @EnableWebSecurity
 @Configuration
-
 public class SecurityConfig {
 
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+    private final CustomUserDetails customUserDetails;
+    private final JwtAuthFilter jwtAuthFilter;
+
+    @Autowired
+    public SecurityConfig(CustomUserDetails customUserDetails, JwtAuthFilter jwtAuthFilter) {
+        this.customUserDetails = customUserDetails;
+        this.jwtAuthFilter = jwtAuthFilter;
+
     }
 
     @Bean
@@ -42,8 +51,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
 
                 )
+                .userDetailsService(customUserDetails)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
-
 }

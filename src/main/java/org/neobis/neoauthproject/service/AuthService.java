@@ -1,8 +1,6 @@
 package org.neobis.neoauthproject.service;
 
-import org.neobis.neoauthproject.dto.UserAuthorizationRequestDto;
-import org.neobis.neoauthproject.dto.UserAuthorizationResponseDto;
-import org.neobis.neoauthproject.dto.UsernameDto;
+import org.neobis.neoauthproject.dto.*;
 import org.neobis.neoauthproject.entity.ConfirmationToken;
 import org.neobis.neoauthproject.entity.User;
 import org.springframework.http.ResponseEntity;
@@ -16,4 +14,6 @@ public interface AuthService {
     ConfirmationToken generateConfirmToken(User user);
 
     String confirmEmail(String token);
+
+    ResponseEntity<JwtResponseDto> authenticate(JwtRequestDto authRequest);
 }

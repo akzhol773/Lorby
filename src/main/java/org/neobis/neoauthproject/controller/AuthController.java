@@ -6,9 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.neobis.neoauthproject.dto.UserAuthorizationRequestDto;
-import org.neobis.neoauthproject.dto.UserAuthorizationResponseDto;
-import org.neobis.neoauthproject.dto.UsernameDto;
+import org.neobis.neoauthproject.dto.*;
 import org.neobis.neoauthproject.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +32,28 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<UserAuthorizationResponseDto> register(@Valid @RequestBody UserAuthorizationRequestDto registrationUserDto){
+    public ResponseEntity<UserAuthorizationResponseDto> register(@RequestBody UserAuthorizationRequestDto registrationUserDto){
         return  authService.createNewUser(registrationUserDto);}
+
+
+
+    @Operation(
+            summary = "Login",
+            description = "Endpoint for getting tokens after login"
+
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successfully returned a token"),
+            @ApiResponse(responseCode = "403", description = "Username or password is invalid"),
+            @ApiResponse(responseCode = "403", description = "Username is not enabled")
+    })
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponseDto> login(@RequestBody JwtRequestDto authRequest){
+        return  authService.authenticate(authRequest);
+
+    }
+
+
 
     @Operation(
             summary = "Check username",
