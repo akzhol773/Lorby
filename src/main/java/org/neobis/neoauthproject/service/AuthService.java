@@ -16,4 +16,6 @@ public interface AuthService {
     String confirmEmail(String token);
 
     ResponseEntity<JwtResponseDto> authenticate(JwtRequestDto authRequest);
+
+    ResponseEntity<JwtRefreshTokenDto> refreshToken(String refreshToken);
 }

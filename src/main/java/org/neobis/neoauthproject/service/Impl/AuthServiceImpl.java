@@ -21,6 +21,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -134,6 +135,33 @@ public class AuthServiceImpl implements AuthService {
             } else {
                 throw new DisabledException("User is not enabled yet");
             }
+        }
+    }
+
+    @Override
+    public ResponseEntity<JwtRefreshTokenDto> refreshToken(String refreshToken) {
+        try {
+            if (refreshToken == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            String usernameFromRefreshToken = jwtTokenUtils.getUsernameFromRefreshToken(refreshToken);
+            if (usernameFromRefreshToken == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            User user = userRepository.findByUsername(usernameFromRefreshToken).orElseThrow(() ->
+                    new UsernameNotFoundException("User not found"));
+
+
+            String accessToken = jwtTokenUtils.generateAccessToken(user);
+            return ResponseEntity.ok(new JwtRefreshTokenDto(usernameFromRefreshToken, accessToken));
+
+        } catch (InvalidTokenException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

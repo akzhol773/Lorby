@@ -28,11 +28,11 @@ public class JwtTokenUtils {
     private final KeyGenerator keyGenerator;
 
     private SecretKey getAccessKey() {
-        return Keys.hmacShaKeyFor(keyGenerator.generateRandomKey().getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor("716f6f496e21776646527c5d7e2d4d4c205b382f6c392c267e512e2349".getBytes(StandardCharsets.UTF_8));
     }
 
     private SecretKey getRefreshKey() {
-        return Keys.hmacShaKeyFor(keyGenerator.generateRandomKey().getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor("716f6f496e21776646527c5d7e2d999c205b382f6c392c267e512e2349".getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateAccessToken(User user) {
