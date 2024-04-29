@@ -14,7 +14,6 @@ import org.neobis.neoauthproject.repository.UserRepository;
 import org.neobis.neoauthproject.service.AuthService;
 import org.neobis.neoauthproject.service.ConfirmationTokenService;
 import org.neobis.neoauthproject.service.EmailService;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +27,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerErrorException;
 
-import java.rmi.ServerException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -189,7 +187,7 @@ public class AuthServiceImpl implements AuthService {
         ConfirmationToken newConfirmationToken = generateConfirmToken(user);
         confirmationTokenRepository.save(newConfirmationToken);
         String link = CONFIRM_EMAIL_LINK + newConfirmationToken.getToken();
-        emailService.sendConfirmationMail(link, user);
+        emailService.prepareConfirmationMail(link, user);
         return ResponseEntity.ok("Success! Please, check your email for the re-confirmation");
     }
 

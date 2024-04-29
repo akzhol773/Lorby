@@ -38,7 +38,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendConfirmationMail(String link, User user) {
+    public void prepareConfirmationMail(String link, User user) {
         Context context = new Context();
         context.setVariable("confirmEmailUrl", link);
         String emailBody = engine.process("confirmation_email", context);
@@ -54,6 +54,7 @@ public class EmailServiceImpl implements EmailService {
        sendEmail(user.getEmail(), emailBody);
     }
 
+    @Override
     public void sendConfirm(String to, String body) {
         try{
             MimeMessage mimeMessage = mailSender.createMimeMessage();
