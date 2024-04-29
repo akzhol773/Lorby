@@ -8,11 +8,13 @@ import org.neobis.neoauthproject.entity.ConfirmationToken;
 import org.neobis.neoauthproject.entity.Role;
 import org.neobis.neoauthproject.entity.User;
 import org.neobis.neoauthproject.exception.*;
+import org.neobis.neoauthproject.repository.ConfirmationTokenRepository;
 import org.neobis.neoauthproject.repository.RoleRepository;
 import org.neobis.neoauthproject.repository.UserRepository;
 import org.neobis.neoauthproject.service.AuthService;
 import org.neobis.neoauthproject.service.ConfirmationTokenService;
 import org.neobis.neoauthproject.service.EmailService;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,9 +26,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ServerErrorException;
 
+import java.rmi.ServerException;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -38,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
+    private final ConfirmationTokenRepository confirmationTokenRepository;
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
     private static final String CONFIRM_EMAIL_LINK = System.getenv("CONFIRM_EMAIL_LINK");
@@ -157,12 +163,34 @@ public class AuthServiceImpl implements AuthService {
             return ResponseEntity.ok(new JwtRefreshTokenDto(usernameFromRefreshToken, accessToken));
 
         } catch (InvalidTokenException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            throw new InvalidTokenException("Given token is invalid");
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            throw new UsernameNotFoundException("Username not found");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new ServerErrorException("There occurred an error.", e.getCause());
         }
+    }
+
+    @Override
+    public ResponseEntity<String> resendConfirmation(ResendEmailDto dto) {
+        User user = userRepository.findByEmailIgnoreCase(dto.email()).orElseThrow(() ->
+                new UsernameNotFoundException("User not found"));
+        if(user.isEnabled()){
+            throw new EmailAlreadyConfirmedException("Email already confirmed");
+        }
+
+        List<ConfirmationToken> confirmationTokens = confirmationTokenRepository.findByUser(user);
+        for(ConfirmationToken confirmationToken : confirmationTokens){
+            confirmationToken.setToken(null);
+            confirmationTokenRepository.save(confirmationToken);
+        }
+
+
+        ConfirmationToken newConfirmationToken = generateConfirmToken(user);
+        confirmationTokenRepository.save(newConfirmationToken);
+        String link = CONFIRM_EMAIL_LINK + newConfirmationToken.getToken();
+        emailService.sendConfirmationMail(link, user);
+        return ResponseEntity.ok("Success! Please, check your email for the re-confirmation");
     }
 
 }

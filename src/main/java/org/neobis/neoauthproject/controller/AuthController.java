@@ -102,4 +102,21 @@ public class AuthController {
 
     }
 
+    @Operation(
+            summary = "Resend confirmation email",
+            description = "User can get another link to confirm their email"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Email successfully confirmed"),
+            @ApiResponse(responseCode = "403", description = "Token has expired"),
+            @ApiResponse(responseCode = "403", description = "Token not found")
+
+    })
+    @PostMapping("/resend-email")
+    public ResponseEntity<String> resendEmail(@RequestBody ResendEmailDto dto) {
+        return  authService.resendConfirmation(dto);
+
+    }
+
+
 }

@@ -18,4 +18,6 @@ public interface AuthService {
     ResponseEntity<JwtResponseDto> authenticate(JwtRequestDto authRequest);
 
     ResponseEntity<JwtRefreshTokenDto> refreshToken(String refreshToken);
+
+    ResponseEntity<String> resendConfirmation(ResendEmailDto dto);
 }
