@@ -19,7 +19,6 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine engine;
 
-
     @Override
     public void sendEmail(String to, String body) {
         try {
@@ -37,14 +36,6 @@ public class EmailServiceImpl implements EmailService {
 
     }
 
-    @Override
-    public void prepareConfirmationMail(String link, User user) {
-        Context context = new Context();
-        context.setVariable("confirmEmailUrl", link);
-        String emailBody = engine.process("confirmation_email", context);
-        sendConfirm(user.getEmail(), emailBody);
-
-    }
 
     @Override
     public void prepareMail(String link, User user){
@@ -53,26 +44,6 @@ public class EmailServiceImpl implements EmailService {
         String emailBody = engine.process("confirmation_email", context);
        sendEmail(user.getEmail(), emailBody);
     }
-
-    @Override
-    public void sendConfirm(String to, String body) {
-        try{
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper =
-                    new MimeMessageHelper(mimeMessage, "utf-8");
-            helper.setText(body, true);
-            helper.setTo(to);
-            helper.setSubject("Confirm your email");
-            helper.setFrom("lorby@edu.com");
-            mailSender.send(mimeMessage);
-        } catch (MessagingException e) {
-            throw new IllegalStateException("Failed to send email");
-        }
-
-    }
-
-
-
 
 
 }

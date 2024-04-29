@@ -8,7 +8,7 @@ import java.util.Base64;
 
 @Component
 public class KeyGenerator {
-    public static String generateRandomKey() {
+    public  String generateRandomKey() {
         // Define the length of the key
         int keyLength = 64; // You can adjust this length as per your requirements
 

@@ -104,24 +104,33 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String confirmEmail(String token) {
-        ConfirmationToken confirmationToken = confirmationTokenService.getToken(token).orElseThrow(()->new TokenNotFoundException("Token not found"));
+        ConfirmationToken confirmationToken = confirmationTokenService.getToken(token)
+                .orElseThrow(() -> new TokenNotFoundException("Token not found"));
+
         if (confirmationToken.getConfirmedAt() != null) {
             throw new EmailAlreadyConfirmedException("Email already confirmed");
         }
-        LocalDateTime expiredAt = confirmationToken.getExpiresAt();
-        if(expiredAt.isBefore(LocalDateTime.now())){
-            throw new TokenExpiredException("Token has expired");
 
+        LocalDateTime expiredAt = confirmationToken.getExpiresAt();
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            throw new TokenExpiredException("Token has expired");
         }
 
-        if (confirmationToken != null){
+        User user = confirmationToken.getUser();
+        if (user != null) {
+
             confirmationToken.setConfirmedAt(LocalDateTime.now());
-            confirmationToken.getUser().setEnabled(true);
+            confirmationTokenRepository.save(confirmationToken);
+
+            user.setEnabled(true);
+            userRepository.save(user);
+
             return "Email confirmed successfully. Go to the login page.";
-        }else {
-            return "verification_failed";
+        } else {
+            return "Verification failed";
         }
     }
+
 
     @Override
     public ResponseEntity<JwtResponseDto> authenticate(JwtRequestDto authRequest) {
@@ -187,7 +196,7 @@ public class AuthServiceImpl implements AuthService {
         ConfirmationToken newConfirmationToken = generateConfirmToken(user);
         confirmationTokenRepository.save(newConfirmationToken);
         String link = CONFIRM_EMAIL_LINK + newConfirmationToken.getToken();
-        emailService.prepareConfirmationMail(link, user);
+        emailService.prepareMail(link, user);
         return ResponseEntity.ok("Success! Please, check your email for the re-confirmation");
     }
 

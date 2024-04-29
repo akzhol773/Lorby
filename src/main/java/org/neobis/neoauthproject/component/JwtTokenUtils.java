@@ -28,11 +28,11 @@ public class JwtTokenUtils {
     private final KeyGenerator keyGenerator;
 
     private SecretKey getAccessKey() {
-        return Keys.hmacShaKeyFor("716f6f496e21776646527c5d7e2d4d4c205b382f6c392c267e512e2349".getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(keyGenerator.generateRandomKey().getBytes(StandardCharsets.UTF_8));
     }
 
     private SecretKey getRefreshKey() {
-        return Keys.hmacShaKeyFor("716f6f496e21776646527c5d7e2d999c205b382f6c392c267e512e2349".getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(keyGenerator.generateRandomKey().getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateAccessToken(User user) {
@@ -46,7 +46,7 @@ public class JwtTokenUtils {
                 .setClaims(claims)
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(Instant.now().toEpochMilli()))
-                .setExpiration(new Date(Instant.now().plus(2, ChronoUnit.MINUTES).toEpochMilli()))
+                .setExpiration(new Date(Instant.now().plus(5, ChronoUnit.MINUTES).toEpochMilli()))
                 .signWith(getAccessKey())
                 .compact();
     }
@@ -55,7 +55,7 @@ public class JwtTokenUtils {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(Instant.now().toEpochMilli()))
-                .setExpiration(new Date(Instant.now().plus(30, ChronoUnit.DAYS).toEpochMilli()))
+                .setExpiration(new Date(Instant.now().plus(1, ChronoUnit.DAYS).toEpochMilli()))
                 .signWith(getRefreshKey())
                 .compact();
     }
