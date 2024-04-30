@@ -101,6 +101,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exceptionDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Object> handleUserNotFoundException(
+            UserNotFoundException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
+        return new ResponseEntity<>(exceptionDto, HttpStatus.NOT_FOUND);
+    }
+
+
+
+
 
 
 

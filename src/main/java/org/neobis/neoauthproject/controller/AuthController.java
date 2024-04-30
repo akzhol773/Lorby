@@ -11,6 +11,7 @@ import org.neobis.neoauthproject.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequiredArgsConstructor
@@ -80,8 +81,10 @@ public class AuthController {
     })
     @Hidden
     @GetMapping("/confirm-email")
-    public String confirm(@RequestParam("token") String token){
-        return authService.confirmEmail(token);
+    public RedirectView confirm(@RequestParam("token") String token) throws InterruptedException {
+        authService.confirmEmail(token);
+        Thread.sleep(3000);
+        return new RedirectView("https://www.google.com");
     }
 
 

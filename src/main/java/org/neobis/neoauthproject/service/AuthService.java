@@ -13,7 +13,7 @@ public interface AuthService {
 
     ConfirmationToken generateConfirmToken(User user);
 
-    String confirmEmail(String token);
+    void confirmEmail(String token);
 
     ResponseEntity<JwtResponseDto> authenticate(JwtRequestDto authRequest);
 

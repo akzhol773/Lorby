@@ -26,6 +26,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -103,7 +104,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String confirmEmail(String token) {
+    public void confirmEmail(String token) {
         ConfirmationToken confirmationToken = confirmationTokenService.getToken(token)
                 .orElseThrow(() -> new TokenNotFoundException("Token not found"));
 
@@ -118,16 +119,12 @@ public class AuthServiceImpl implements AuthService {
 
         User user = confirmationToken.getUser();
         if (user != null) {
-
             confirmationToken.setConfirmedAt(LocalDateTime.now());
             confirmationTokenRepository.save(confirmationToken);
-
             user.setEnabled(true);
             userRepository.save(user);
-
-            return "Email confirmed successfully. Go to the login page.";
-        } else {
-            return "Verification failed";
+        }else {
+            throw new UserNotFoundException("User not found");
         }
     }
 
