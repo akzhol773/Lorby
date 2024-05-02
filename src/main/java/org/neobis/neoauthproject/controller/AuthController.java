@@ -81,10 +81,9 @@ public class AuthController {
     })
     @Hidden
     @GetMapping("/confirm-email")
-    public RedirectView confirm(@RequestParam("token") String token) throws InterruptedException {
+    public RedirectView confirm(@RequestParam("token") String token) {
         authService.confirmEmail(token);
-        Thread.sleep(3000);
-        return new RedirectView("https://www.google.com");
+        return new RedirectView("https://jazzy-chimera-5f8327.netlify.app/?token="+token);
     }
 
 
@@ -118,7 +117,6 @@ public class AuthController {
     @PostMapping("/resend-email")
     public ResponseEntity<String> resendEmail(@RequestBody ResendEmailDto dto) {
         return  authService.resendConfirmation(dto);
-
     }
 
 
