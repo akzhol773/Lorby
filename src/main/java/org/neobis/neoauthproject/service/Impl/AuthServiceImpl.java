@@ -5,15 +5,18 @@ import lombok.RequiredArgsConstructor;
 import org.neobis.neoauthproject.component.JwtTokenUtils;
 import org.neobis.neoauthproject.dto.*;
 import org.neobis.neoauthproject.entity.ConfirmationToken;
+import org.neobis.neoauthproject.entity.PasswordResetToken;
 import org.neobis.neoauthproject.entity.Role;
 import org.neobis.neoauthproject.entity.User;
 import org.neobis.neoauthproject.exception.*;
 import org.neobis.neoauthproject.repository.ConfirmationTokenRepository;
+import org.neobis.neoauthproject.repository.ResetTokenRepository;
 import org.neobis.neoauthproject.repository.RoleRepository;
 import org.neobis.neoauthproject.repository.UserRepository;
 import org.neobis.neoauthproject.service.AuthService;
 import org.neobis.neoauthproject.service.ConfirmationTokenService;
 import org.neobis.neoauthproject.service.EmailService;
+import org.neobis.neoauthproject.service.ResetTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -45,7 +48,12 @@ public class AuthServiceImpl implements AuthService {
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
+    private final ResetTokenRepository resetTokenServiceRepository;
+    private final ResetTokenService resetTokenService;
     private static final String CONFIRM_EMAIL_LINK = System.getenv("CONFIRM_EMAIL_LINK");
+    private static final String RESET_PASSWORD_EMAIL_LINK = System.getenv("RESET_PASSWORD_EMAIL_LINK");
+
+
     @Override
     @Transactional
     public ResponseEntity<UserAuthorizationResponseDto> createNewUser(UserAuthorizationRequestDto registrationUserDto) {
@@ -196,5 +204,62 @@ public class AuthServiceImpl implements AuthService {
         emailService.prepareMail(link, user);
         return ResponseEntity.ok("Success! Please, check your email for the re-confirmation");
     }
+
+    @Override
+    public ResponseEntity<String> forgotPassword(ForgotPasswordDto dto) {
+        User user = userRepository.findByEmailOrUsername(dto.emailOrUsername()).orElseThrow(() ->
+                new UsernameNotFoundException("User not found"));
+
+        List<PasswordResetToken> confirmationTokens = resetTokenServiceRepository.findByUser(user);
+        for(PasswordResetToken confirmationToken : confirmationTokens){
+            confirmationToken.setToken(null);
+            resetTokenServiceRepository.save(confirmationToken);
+        }
+
+        PasswordResetToken confirmationToken = generateResetToken(user);
+        resetTokenService.saveResetToken(confirmationToken);
+
+        String link = RESET_PASSWORD_EMAIL_LINK + confirmationToken.getToken();
+
+        emailService.sendForgotPasswordMail(link, user);
+
+
+        return ResponseEntity.ok().body("Email sent to reset your password");
+    }
+
+    @Override
+    public ResponseEntity<String> resetPassword(String resetToken, ResetPasswordDto dto) {
+        PasswordResetToken confirmationToken = resetTokenService.getToken(resetToken).orElseThrow(()->new TokenNotFoundException("Token not found"));
+        LocalDateTime expiredAt = confirmationToken.getExpiresAt();
+        if(expiredAt.isBefore(LocalDateTime.now())){
+            throw new TokenExpiredException("Token has expired");
+        }
+        confirmationToken.setResetAt(LocalDateTime.now());
+
+        String password = dto.newPassword();
+        String confirmPassword = dto.confirmNewPassword();
+
+        if (!password.equals(confirmPassword)) {
+            throw new PasswordDontMatchException("Passwords do not match.");
+        }
+
+
+        User user = confirmationToken.getUser();
+        user.setPassword(passwordEncoder.encode(dto.newPassword()));
+        userRepository.save(user);
+        return ResponseEntity.ok().body("Password has been changed successfully");
+    }
+
+    public PasswordResetToken generateResetToken(User user) {
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken confirmationToken = new PasswordResetToken(
+                token,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(5),
+                null,
+                user);
+        return confirmationToken;
+    }
+
 
 }

@@ -8,4 +8,5 @@ public interface EmailService {
     void sendEmail(String to, String body);
 
 
+    void sendForgotPasswordMail(String link, User user);
 }

@@ -36,6 +36,14 @@ public class EmailServiceImpl implements EmailService {
 
     }
 
+    @Override
+    public void sendForgotPasswordMail(String link, User user) {
+        Context context = new Context();
+        context.setVariable("forgotPasswordUrl", link);
+        String emailBody = engine.process("forgot_password", context);
+        sendReset(user.getEmail(), emailBody);
+    }
+
 
     @Override
     public void prepareMail(String link, User user){
@@ -45,5 +53,20 @@ public class EmailServiceImpl implements EmailService {
        sendEmail(user.getEmail(), emailBody);
     }
 
+
+    public void sendReset(String to, String body) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(mimeMessage, "utf-8");
+            helper.setText(body, true);
+            helper.setTo(to);
+            helper.setSubject("Reset your password");
+            helper.setFrom("lorby@edu.com");
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new IllegalStateException("Failed to send email");
+        }
+    }
 
 }

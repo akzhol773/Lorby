@@ -109,6 +109,13 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(PasswordDontMatchException.class)
+    public ResponseEntity<?> handlePasswordDontMatchException(PasswordDontMatchException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
+        return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
+    }
+
+
 
 
 
