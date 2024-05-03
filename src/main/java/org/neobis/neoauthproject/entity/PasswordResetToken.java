@@ -20,16 +20,16 @@ public class PasswordResetToken {
 
     String token;
 
-    @Column(nullable = false)
+
     LocalDateTime createdAt;
 
-    @Column(nullable = false)
+
     LocalDateTime expiresAt;
 
     LocalDateTime resetAt;
 
     @ManyToOne
-    @JoinColumn(nullable = false, name = "user_id")
+    @JoinColumn(name = "user_id")
     User user;
 
 }

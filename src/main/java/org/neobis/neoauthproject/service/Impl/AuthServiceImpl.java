@@ -98,17 +98,18 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-    @Override
     public ConfirmationToken generateConfirmToken(User user) {
         String token = UUID.randomUUID().toString();
-        ConfirmationToken confirmationToken = new ConfirmationToken();
-                confirmationToken.setToken(token);
-                confirmationToken.setCreatedAt(LocalDateTime.now());
-                confirmationToken.setExpiresAt(LocalDateTime.now().plusMinutes(5));
-                confirmationToken.setConfirmedAt(null);
-                confirmationToken.setUser(user);
+        ConfirmationToken confirmationToken = new ConfirmationToken(
+                token,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(5),
+                null,
+                user);
         return confirmationToken;
     }
+
+
 
     @Override
     public void confirmEmail(String token) {

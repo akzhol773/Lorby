@@ -25,14 +25,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtTokenUtils {
 
-    private final KeyGenerator keyGenerator;
+    private static final String ACCESS_SECRET_KEY = System.getenv("ACCESS_KEY");
+    private static final String REFRESH_SECRET_KEY = System.getenv("REFRESH_KEY");
 
-    private SecretKey getAccessKey() {
-        return Keys.hmacShaKeyFor(keyGenerator.generateRandomKey().getBytes(StandardCharsets.UTF_8));
+    private static SecretKey getAccessKey() {
+        return Keys.hmacShaKeyFor(ACCESS_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
 
-    private SecretKey getRefreshKey() {
-        return Keys.hmacShaKeyFor(keyGenerator.generateRandomKey().getBytes(StandardCharsets.UTF_8));
+    private static SecretKey getRefreshKey() {
+        return Keys.hmacShaKeyFor(REFRESH_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateAccessToken(User user) {

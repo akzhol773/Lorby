@@ -17,20 +17,25 @@ public class ConfirmationToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(nullable = false)
     String token;
 
-    @Column(nullable = false)
     LocalDateTime createdAt;
 
-    @Column(nullable = false)
     LocalDateTime expiresAt;
 
     LocalDateTime confirmedAt;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(nullable = false, name = "user_id")
+    @JoinColumn(name = "user_id")
     User user;
+
+    public ConfirmationToken( String token, LocalDateTime createdAt, LocalDateTime expiresAt, LocalDateTime confirmedAt, User user) {
+        this.token = token;
+        this.createdAt = createdAt;
+        this.expiresAt = expiresAt;
+        this.confirmedAt = confirmedAt;
+        this.user = user;
+    }
 
 
 }

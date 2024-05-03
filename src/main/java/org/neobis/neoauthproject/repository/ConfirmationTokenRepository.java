@@ -14,6 +14,7 @@ import java.util.Optional;
 @Repository
 public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationToken, Long> {
     Optional<ConfirmationToken> findByToken(String token);
+    @Query("SELECT ct FROM ConfirmationToken ct WHERE ct.user = :user")
     List<ConfirmationToken> findByUser(User user);
 
 }
