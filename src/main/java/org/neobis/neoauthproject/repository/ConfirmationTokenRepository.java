@@ -16,6 +16,4 @@ public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationT
     Optional<ConfirmationToken> findByToken(String token);
     List<ConfirmationToken> findByUser(User user);
 
-    @Query("SELECT t FROM ConfirmationToken t WHERE t.user.email = :email ORDER BY t.createdAt DESC")
-    Optional<ConfirmationToken> getLastToken(@Param("email") String email);
 }

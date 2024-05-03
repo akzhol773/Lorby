@@ -14,7 +14,5 @@ import java.util.Optional;
 public interface ResetPasswordTokenRepository extends JpaRepository<PasswordResetToken, Long> {
     Optional<PasswordResetToken> findByToken(String token);
     List<PasswordResetToken> findByUser(User user);
-    @Query("SELECT t FROM PasswordResetToken t WHERE t.user.email = :email ORDER BY t.createdAt DESC")
-    Optional<PasswordResetToken> getLastToken(@Param("email") String email);
 
 }
