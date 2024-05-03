@@ -189,9 +189,7 @@ public class AuthServiceImpl implements AuthService {
         if(user.isEnabled()){
             throw new EmailAlreadyConfirmedException("Email already confirmed");
         }
-        if (!canRequestPasswordResetEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().body("Confirm email request already made within the last 1 minutes");
-        }
+
         List<ConfirmationToken> confirmationTokens = confirmationTokenRepository.findByUser(user);
         for(ConfirmationToken confirmationToken : confirmationTokens){
             confirmationToken.setToken(null);
@@ -210,9 +208,6 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmailOrUsername(dto.emailOrUsername()).orElseThrow(() ->
                 new UsernameNotFoundException("User not found"));
 
-        if (!canRequestPasswordResetEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().body("Password reset request already made within the last 1 minutes");
-        }
 
         List<PasswordResetToken> confirmationTokens = resetPasswordTokenRepository.findByUser(user);
         for(PasswordResetToken confirmationToken : confirmationTokens){
@@ -259,27 +254,6 @@ public class AuthServiceImpl implements AuthService {
         confirmationToken.setResetAt(null);
         confirmationToken.setUser(user);
         return confirmationToken;
-    }
-
-
-    public boolean canRequestPasswordResetEmail(String email) {
-        Optional<PasswordResetToken> existingToken = resetPasswordTokenRepository.getLastToken(email);
-        if (existingToken.isPresent()) {
-            LocalDateTime lastRequestTime = existingToken.get().getCreatedAt();
-            LocalDateTime now = LocalDateTime.now();
-            return lastRequestTime.plusMinutes(1).isBefore(now);
-        }
-        return true;
-    }
-
-    public boolean canRequestConfirmEmail(String email) {
-        Optional<ConfirmationToken> existingToken = confirmationTokenRepository.getLastToken(email);
-        if (existingToken.isPresent()) {
-            LocalDateTime lastRequestTime = existingToken.get().getCreatedAt();
-            LocalDateTime now = LocalDateTime.now();
-            return lastRequestTime.plusMinutes(1).isBefore(now);
-        }
-        return true;
     }
 
 
