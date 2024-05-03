@@ -1,7 +1,7 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
       dialect: org.hibernate.dialect.MySQLDialect
     open-in-view: true
     defer-datasource-initialization: true
