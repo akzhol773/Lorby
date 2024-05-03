@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.neobis.neoauthproject.dto.*;
 import org.neobis.neoauthproject.service.AuthService;
@@ -54,8 +53,6 @@ public class AuthController {
 
     }
 
-
-
     @Operation(
             summary = "Check username",
             description = "This endpoint is designed to check if the username exists in the database or not",
@@ -83,7 +80,7 @@ public class AuthController {
     @GetMapping("/confirm-email")
     public RedirectView confirm(@RequestParam("token") String token) {
         authService.confirmEmail(token);
-        return new RedirectView("https://jazzy-chimera-5f8327.netlify.app/?token="+token);
+        return new RedirectView("https://jazzy-chimera-5f8327.netlify.app/confirmed");
     }
 
 
@@ -116,8 +113,37 @@ public class AuthController {
     })
     @PostMapping("/resend-email")
     public ResponseEntity<String> resendEmail(@RequestBody ResendEmailDto dto) {
-        return  authService.resendConfirmation(dto);
+        return  authService.resendConfirmationEmail(dto);
     }
+
+    @Operation(
+            summary = "Users can reset their password using this link. It sends link to the email",
+            description = "User can get another link to confirm their email"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Link has been sent to the email"),
+            @ApiResponse(responseCode = "403", description = "User not found"),
+
+    })
+    @PutMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordDto dto){
+        return authService.forgotPassword(dto);
+    }
+
+    @Operation(
+            summary = "Reset password",
+            description = "Resetting the password with the provided new password"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Password has been changed successfully"),
+            @ApiResponse(responseCode = "403", description = "Invalid token"),
+
+    })
+    @PutMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestParam ("resetToken") String resetToken, @RequestBody ResetPasswordDto resetPasswordDto){
+        return authService.resetPassword(resetToken, resetPasswordDto);
+    }
+
 
 
 }

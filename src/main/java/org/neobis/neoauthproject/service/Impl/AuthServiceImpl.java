@@ -5,15 +5,18 @@ import lombok.RequiredArgsConstructor;
 import org.neobis.neoauthproject.component.JwtTokenUtils;
 import org.neobis.neoauthproject.dto.*;
 import org.neobis.neoauthproject.entity.ConfirmationToken;
+import org.neobis.neoauthproject.entity.PasswordResetToken;
 import org.neobis.neoauthproject.entity.Role;
 import org.neobis.neoauthproject.entity.User;
 import org.neobis.neoauthproject.exception.*;
 import org.neobis.neoauthproject.repository.ConfirmationTokenRepository;
+import org.neobis.neoauthproject.repository.ResetPasswordTokenRepository;
 import org.neobis.neoauthproject.repository.RoleRepository;
 import org.neobis.neoauthproject.repository.UserRepository;
 import org.neobis.neoauthproject.service.AuthService;
 import org.neobis.neoauthproject.service.ConfirmationTokenService;
 import org.neobis.neoauthproject.service.EmailService;
+import org.neobis.neoauthproject.service.ResetTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,11 +29,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerErrorException;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -45,7 +48,12 @@ public class AuthServiceImpl implements AuthService {
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
+    private final ResetPasswordTokenRepository resetPasswordTokenRepository;
+    private final ResetTokenService resetTokenService;
     private static final String CONFIRM_EMAIL_LINK = System.getenv("CONFIRM_EMAIL_LINK");
+    private static final String RESET_PASSWORD_EMAIL_LINK = System.getenv("RESET_PASSWORD_EMAIL_LINK");
+
+
     @Override
     @Transactional
     public ResponseEntity<UserAuthorizationResponseDto> createNewUser(UserAuthorizationRequestDto registrationUserDto) {
@@ -73,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
         confirmationTokenService.saveConfirmationToken(confirmationToken);
 
         String link = CONFIRM_EMAIL_LINK + confirmationToken.getToken();
-        emailService.prepareMail(link, user);
+        emailService.sendConfirmMail(link, user);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new UserAuthorizationResponseDto(user.getUsername(),"User registered successfully"));
 
@@ -82,7 +90,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean isPresentUsername(UsernameDto dto) {
-
         if (userRepository.findByUsername(dto.username()).isPresent()) {
             return true;
         }else {
@@ -176,25 +183,104 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<String> resendConfirmation(ResendEmailDto dto) {
+    public ResponseEntity<String> resendConfirmationEmail(ResendEmailDto dto) {
         User user = userRepository.findByEmailIgnoreCase(dto.email()).orElseThrow(() ->
                 new UsernameNotFoundException("User not found"));
         if(user.isEnabled()){
             throw new EmailAlreadyConfirmedException("Email already confirmed");
         }
-
+        if (!canRequestPasswordResetEmail(user.getEmail())) {
+            return ResponseEntity.badRequest().body("Confirm email request already made within the last 1 minutes");
+        }
         List<ConfirmationToken> confirmationTokens = confirmationTokenRepository.findByUser(user);
         for(ConfirmationToken confirmationToken : confirmationTokens){
             confirmationToken.setToken(null);
             confirmationTokenRepository.save(confirmationToken);
         }
 
-
         ConfirmationToken newConfirmationToken = generateConfirmToken(user);
         confirmationTokenRepository.save(newConfirmationToken);
         String link = CONFIRM_EMAIL_LINK + newConfirmationToken.getToken();
-        emailService.prepareMail(link, user);
+        emailService.sendConfirmMail(link, user);
         return ResponseEntity.ok("Success! Please, check your email for the re-confirmation");
     }
+
+    @Override
+    public ResponseEntity<String> forgotPassword(ForgotPasswordDto dto) {
+        User user = userRepository.findByEmailOrUsername(dto.emailOrUsername()).orElseThrow(() ->
+                new UsernameNotFoundException("User not found"));
+
+        if (!canRequestPasswordResetEmail(user.getEmail())) {
+            return ResponseEntity.badRequest().body("Password reset request already made within the last 1 minutes");
+        }
+
+        List<PasswordResetToken> confirmationTokens = resetPasswordTokenRepository.findByUser(user);
+        for(PasswordResetToken confirmationToken : confirmationTokens){
+            confirmationToken.setToken(null);
+            resetPasswordTokenRepository.save(confirmationToken);
+        }
+
+        PasswordResetToken confirmationToken = generateResetPasswordToken(user);
+        resetTokenService.saveResetToken(confirmationToken);
+        String link = RESET_PASSWORD_EMAIL_LINK + confirmationToken.getToken();
+        emailService.sendForgotPasswordMail(link, user);
+        return ResponseEntity.ok().body("Email sent to reset your password");
+    }
+
+    @Override
+    public ResponseEntity<String> resetPassword(String resetToken, ResetPasswordDto dto) {
+        PasswordResetToken confirmationToken = resetTokenService.getToken(resetToken).orElseThrow(()->new TokenNotFoundException("Token not found"));
+        LocalDateTime expiredAt = confirmationToken.getExpiresAt();
+        if(expiredAt.isBefore(LocalDateTime.now())){
+            throw new TokenExpiredException("Token has expired");
+        }
+        confirmationToken.setResetAt(LocalDateTime.now());
+
+        String password = dto.newPassword();
+        String confirmPassword = dto.confirmNewPassword();
+
+        if (!password.equals(confirmPassword)) {
+            throw new PasswordDontMatchException("Passwords do not match.");
+        }
+
+
+        User user = confirmationToken.getUser();
+        user.setPassword(passwordEncoder.encode(dto.newPassword()));
+        userRepository.save(user);
+        return ResponseEntity.ok().body("Password has been changed successfully");
+    }
+
+    public PasswordResetToken generateResetPasswordToken(User user) {
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken confirmationToken = new PasswordResetToken();
+        confirmationToken.setToken(token);
+        confirmationToken.setCreatedAt(LocalDateTime.now());
+        confirmationToken.setExpiresAt(LocalDateTime.now().plusMinutes(5));
+        confirmationToken.setResetAt(null);
+        confirmationToken.setUser(user);
+        return confirmationToken;
+    }
+
+
+    public boolean canRequestPasswordResetEmail(String email) {
+        Optional<PasswordResetToken> existingToken = resetPasswordTokenRepository.getLastToken(email);
+        if (existingToken.isPresent()) {
+            LocalDateTime lastRequestTime = existingToken.get().getCreatedAt();
+            LocalDateTime now = LocalDateTime.now();
+            return lastRequestTime.plusMinutes(1).isBefore(now);
+        }
+        return true;
+    }
+
+    public boolean canRequestConfirmEmail(String email) {
+        Optional<ConfirmationToken> existingToken = confirmationTokenRepository.getLastToken(email);
+        if (existingToken.isPresent()) {
+            LocalDateTime lastRequestTime = existingToken.get().getCreatedAt();
+            LocalDateTime now = LocalDateTime.now();
+            return lastRequestTime.plusMinutes(1).isBefore(now);
+        }
+        return true;
+    }
+
 
 }

@@ -17,5 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmailIgnoreCase(String email);
 
-
+    @Query("SELECT u FROM User u WHERE (u.email = :emailOrUsername OR u.username = :emailOrUsername)")
+    Optional<User> findByEmailOrUsername(@Param("emailOrUsername") String emailOrUsername);
 }

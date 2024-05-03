@@ -19,5 +19,9 @@ public interface AuthService {
 
     ResponseEntity<JwtRefreshTokenDto> refreshToken(String refreshToken);
 
-    ResponseEntity<String> resendConfirmation(ResendEmailDto dto);
+    ResponseEntity<String> resendConfirmationEmail(ResendEmailDto dto);
+
+    ResponseEntity<String> forgotPassword(ForgotPasswordDto dto);
+
+    ResponseEntity<String> resetPassword(String resetToken, ResetPasswordDto resetPasswordDto);
 }
