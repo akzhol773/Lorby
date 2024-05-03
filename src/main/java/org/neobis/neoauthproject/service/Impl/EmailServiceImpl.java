@@ -1,6 +1,5 @@
 package org.neobis.neoauthproject.service.Impl;
 
-
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -12,15 +11,13 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine engine;
-
     @Override
-    public void sendEmail(String to, String body) {
+    public void prepareConfirmMail(String to, String body) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper =
@@ -33,7 +30,6 @@ public class EmailServiceImpl implements EmailService {
         } catch (MessagingException e) {
             throw new IllegalStateException("Failed to send email");
         }
-
     }
 
     @Override
@@ -41,20 +37,21 @@ public class EmailServiceImpl implements EmailService {
         Context context = new Context();
         context.setVariable("forgotPasswordUrl", link);
         String emailBody = engine.process("forgot_password", context);
-        sendReset(user.getEmail(), emailBody);
+        prepareForgotPasswordMail(user.getEmail(), emailBody);
     }
 
 
     @Override
-    public void prepareMail(String link, User user){
+    public void sendConfirmMail(String link, User user){
         Context context = new Context();
         context.setVariable("confirmEmailUrl", link);
         String emailBody = engine.process("confirmation_email", context);
-       sendEmail(user.getEmail(), emailBody);
+       prepareConfirmMail(user.getEmail(), emailBody);
     }
 
 
-    public void sendReset(String to, String body) {
+    @Override
+    public void prepareForgotPasswordMail(String to, String body) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper =

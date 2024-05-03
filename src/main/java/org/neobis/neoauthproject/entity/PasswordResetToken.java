@@ -1,42 +1,35 @@
 package org.neobis.neoauthproject.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PasswordResetToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
-    private String token;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    String token;
 
     @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    LocalDateTime createdAt;
 
-    private LocalDateTime resetAt;
+    @Column(nullable = false)
+    LocalDateTime expiresAt;
+
+    LocalDateTime resetAt;
 
     @ManyToOne
     @JoinColumn(nullable = false, name = "user_id")
-    private User user;
+    User user;
 
-    public PasswordResetToken(String token, LocalDateTime createdAt, LocalDateTime expiresAt, LocalDateTime resetAt, User user) {
-        this.token = token;
-        this.createdAt = createdAt;
-        this.expiresAt = expiresAt;
-        this.resetAt = resetAt;
-        this.user = user;
-    }
 }
