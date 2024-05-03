@@ -238,13 +238,11 @@ public class AuthServiceImpl implements AuthService {
             throw new PasswordDontMatchException("Passwords do not match.");
         }
 
-
         User user = confirmationToken.getUser();
         user.setPassword(passwordEncoder.encode(dto.newPassword()));
         userRepository.save(user);
         return ResponseEntity.ok().body("Password has been changed successfully");
     }
-
     public PasswordResetToken generateResetPasswordToken(User user) {
         String token = UUID.randomUUID().toString();
         PasswordResetToken confirmationToken = new PasswordResetToken();
