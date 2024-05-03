@@ -24,7 +24,7 @@ public class EmailServiceImpl implements EmailService {
                     new MimeMessageHelper(mimeMessage, "utf-8");
             helper.setText(body, true);
             helper.setTo(to);
-            helper.setSubject("Confirm your email");
+            helper.setSubject("Активируй твою почту.");
             helper.setFrom("lorby@edu.com");
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
@@ -58,7 +58,7 @@ public class EmailServiceImpl implements EmailService {
                     new MimeMessageHelper(mimeMessage, "utf-8");
             helper.setText(body, true);
             helper.setTo(to);
-            helper.setSubject("Reset your password");
+            helper.setSubject("Сбросить пароль");
             helper.setFrom("lorby@edu.com");
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
