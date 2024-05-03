@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.ServerErrorException;
 
 import java.rmi.ServerException;
 import java.time.LocalDateTime;
@@ -94,9 +95,9 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler(ServerException.class)
-    public ResponseEntity<Object> handleServerException(
-            ServerException ex) {
+    @ExceptionHandler(ServerErrorException.class)
+    public ResponseEntity<Object> handleServerErrorException(
+            ServerErrorException ex) {
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -114,13 +115,6 @@ public class GlobalExceptionHandler {
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
     }
-
-
-
-
-
-
-
 
 
 }
