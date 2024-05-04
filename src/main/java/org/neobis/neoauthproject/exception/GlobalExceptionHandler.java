@@ -1,5 +1,6 @@
 package org.neobis.neoauthproject.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.neobis.neoauthproject.dto.ExceptionDto;
 import org.neobis.neoauthproject.dto.InvalidTokenException;
 import org.springframework.http.HttpStatus;
@@ -16,12 +17,16 @@ import java.rmi.ServerException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailAlreadyExistException.class)
     public ResponseEntity<?> handleEmailAlreadyExistException(EmailAlreadyExistException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
     }
@@ -29,12 +34,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserRoleNotFoundException.class)
     public ResponseEntity<Object> handleUserRoleNotFoundException(
             UserRoleNotFoundException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(PasswordNotMatchException.class)
     public ResponseEntity<?> handlePasswordNotMatchException(PasswordNotMatchException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
     }
@@ -42,6 +51,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TokenNotFoundException.class)
     public ResponseEntity<Object> handleTokenNotFoundException(
             TokenNotFoundException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.NOT_FOUND);
     }
@@ -49,6 +60,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyConfirmedException.class)
     public ResponseEntity<Object> handleEmailAlreadyConfirmedException(
             EmailAlreadyConfirmedException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
     }
@@ -56,12 +69,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<Object> handleTokenExpiredException(
             TokenExpiredException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(UsernameAlreadyTakenException.class)
     public ResponseEntity<?> handleUsernameAlreadyTakenException(UsernameAlreadyTakenException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
     }
@@ -69,6 +86,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Object> handleBadCredentialsException(
             BadCredentialsException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
     }
@@ -76,6 +95,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<Object> handleDisabledException(
             DisabledException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.UNAUTHORIZED);
     }
@@ -83,6 +104,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<Object> handleInvalidTokenException(
             InvalidTokenException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.UNAUTHORIZED);
     }
@@ -90,6 +113,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Object> handleUsernameNotFoundException(
             UsernameNotFoundException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.NOT_FOUND);
     }
@@ -98,6 +123,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ServerErrorException.class)
     public ResponseEntity<Object> handleServerErrorException(
             ServerErrorException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -105,6 +132,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Object> handleUserNotFoundException(
             UserNotFoundException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.NOT_FOUND);
     }
@@ -112,9 +141,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PasswordDontMatchException.class)
     public ResponseEntity<?> handlePasswordDontMatchException(PasswordDontMatchException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
     }
-
 
 }
