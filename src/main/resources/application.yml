@@ -1,22 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: prod
 
-  datasource:
-    url: ${JDBC_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
-    driver-class-name: org.postgresql.Driver
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${GMAIL}
-    password: ${GMAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
 
