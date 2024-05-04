@@ -60,7 +60,7 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "Returns true or false")
             }
     )
-    @PostMapping("/check-username")
+    @GetMapping("/check-username")
     public Boolean checkUsername(@RequestBody UsernameDto dto) {
         return authService.isPresentUsername(dto);
     }

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "password_reset_token")
 public class PasswordResetToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
