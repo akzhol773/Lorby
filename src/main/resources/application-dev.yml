@@ -6,12 +6,12 @@ spring:
     open-in-view: true
     defer-datasource-initialization: true
     show-sql: true
-  logging:
-    level:
-      org:
-        springframework:
-          security: debug
-      sql: debug
+#  logging:
+#    level:
+#      org:
+#        springframework:
+#          security: debug
+#      sql: debug
   main:
     banner-mode: off
   datasource:
